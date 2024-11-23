@@ -1,6 +1,9 @@
-﻿using JetBrains.Annotations;
+﻿using System.Linq;
+using JetBrains.Annotations;
 using MelonLoader;
 using UnityEngine;
+using WYDClassicMod.API;
+using WYDClassicMod.Networking;
 
 [assembly: MelonInfo(typeof(WYDClassicMod.WYDClassicMod), "WYDClassicMod", "1.0.0", "StupidRepo")]
 namespace WYDClassicMod;
@@ -9,16 +12,46 @@ public class WYDClassicMod : MelonMod
 {
 	[CanBeNull] public static BabyStats babyStats;
 	public static DadPowerUps dadPowerUps;
+	
+	public static GameObject BRPC;
+	public static GameObject BListener;
 
 	private const float windowWidth = 280f;
 	private Rect windowRect = new(20, 20, windowWidth, 75);
 	
 	private const float barHeight = 10f;
 	
-	public override void OnInitializeMelon()
+	private bool gameObjectsInitialized;
+
+	// public override void OnInitializeMelon()
+	// {
+	// 	MelonLogger.Msg("Loading WYDClassicMod!");
+	// 	ConfigManager.Instance = new ConfigManager();
+	// 	
+	// 	ItemAPI.RegisterNewItem("Test Item", new GameObject("Toaster"), Rarity.Low, 100);
+	// }
+
+	// TODO: We do initialisation in here because OnInitializeMelon doesn't exist in 0.4.x? Need to find a way around this.
+	public override void OnSceneWasLoaded(int buildIndex, string sceneName)
 	{
-		LoggerInstance.Msg("Loading WYDClassicMod!");
+		if (gameObjectsInitialized) return;
+		gameObjectsInitialized = true;
+		
+		MelonLogger.Msg("Loading WYDClassicMod!");
+			
+		BRPC = new GameObject("BradRPC");
+		BRPC.AddComponent<BradRPC>();
+		Object.DontDestroyOnLoad(BRPC);
+		
+		BListener = new GameObject("BradListener");
+		BListener.AddComponent<BradListener>();
+		Object.DontDestroyOnLoad(BListener);
+
+		// MelonLogger.Msg(MelonMod.RegisteredMelons.Select(e => e.Info.Name));
+		
 		ConfigManager.Instance = new ConfigManager();
+		
+		ItemAPI.RegisterNewItem("Test Item", new GameObject("Toaster"), Rarity.Low, 100);
 	}
 
 	public override void OnGUI()
@@ -68,6 +101,9 @@ public class WYDClassicMod : MelonMod
 		}
 		else
 			GUILayout.Label("<b><color=red>Your health and other stats will show up here when you're in-game!</color></b>");
+
+		if (PhotonNetwork.inRoom && PhotonNetwork.room.CustomProperties.ContainsKey("isModded"))
+			GUILayout.Label("<b>Lobby is modded!</b>");
 
 		GUI.DragWindow();
 	}

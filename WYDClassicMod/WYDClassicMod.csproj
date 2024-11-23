@@ -14,6 +14,7 @@
     <ItemGroup>
 <!--        <Reference Include="$(MLManaged)\*.dll"/>-->
         <Reference Include="$(GManaged)\Assembly-*.dll"/>
+        <Reference Include="$(GManaged)\Photon*.dll"/>
         <Reference Include="$(GManaged)\Unity*.dll"/>
     </ItemGroup>
     

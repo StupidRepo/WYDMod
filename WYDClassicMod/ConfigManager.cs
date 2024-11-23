@@ -10,7 +10,7 @@ public class ConfigManager
 
 	public ConfigManager()
 	{
-		Melon<WYDClassicMod>.Logger.Msg("Loading config!");
+		MelonLogger.Msg("Loading config!");
 
 		#region General
 			GeneralCategory = MelonPreferences.CreateCategory("WYDClassicMod.General", "General Settings");
