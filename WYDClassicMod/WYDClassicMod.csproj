@@ -12,7 +12,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Reference Include="$(MLManaged)\*.dll"/>
+<!--        <Reference Include="$(MLManaged)\*.dll"/>-->
         <Reference Include="$(GManaged)\Assembly-*.dll"/>
         <Reference Include="$(GManaged)\Unity*.dll"/>
     </ItemGroup>
@@ -22,9 +22,26 @@
         <PackageReference Include="LavaGang.MelonLoader" Version="0.6.6" />
         <PackageReference Include="MonoMod.Backports" Version="1.1.2" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <Content Include="WYDClassicMod.csproj.user" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Folder Include="Zip\" />
+    </ItemGroup>
 
     <Target Name="CopyDLL" AfterTargets="AfterBuild">
-        <Copy SourceFiles="$(OutDir)\$(AssemblyName).dll" DestinationFolder="$(OurOutDir)" />
+        <ItemGroup>
+            <MonoMod Include="$(OutDir)\MonoMod*.dll"/>
+        </ItemGroup>
+        
+        <Copy SourceFiles="$(OutDir)\$(AssemblyName).dll" DestinationFolder="$(OurOutDir)\" />
+        <Copy SourceFiles="@(MonoMod)" DestinationFolder="$(OurOutDir)\" />
     </Target>
-
+    
+    <Target Condition="$(Configuration) == 'Release'" Name="ZipDLL" AfterTargets="CopyDLL">
+        <Message Text="Zipping for release!"/>
+        <ZipDirectory SourceDirectory="$(OurOutDir)\" DestinationFile="$(ProjectDir)\Zip\WYDClassicMod.zip" Overwrite="true"/>
+    </Target>
 </Project>

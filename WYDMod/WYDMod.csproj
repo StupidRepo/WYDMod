@@ -9,6 +9,7 @@
         <LangVersion>latest</LangVersion>
         <RootNamespace>WYDMod</RootNamespace>
     </PropertyGroup>
+    
     <ItemGroup>
         <Reference Include="$(DLLDir)\*Scripts.dll"/>
         <Reference Include="$(DLLDir)\*Photon*.dll"/>
@@ -16,9 +17,14 @@
         <Reference Include="$(DLLDir)\*mscorlib*.dll"/>
         <Reference Include="$(NET6Dir)\IL2CppInterop*.dll"/>
     </ItemGroup>
+    
     <ItemGroup>
       <PackageReference Include="HarmonyX" Version="2.13.0" />
       <PackageReference Include="LavaGang.MelonLoader" Version="0.6.6" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Content Include="WYDMod.csproj.user" />
     </ItemGroup>
 
     <Target Name="CopyDLL" AfterTargets="AfterBuild">
