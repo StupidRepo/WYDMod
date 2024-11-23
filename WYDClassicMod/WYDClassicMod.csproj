@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    
+    <PropertyGroup>
+        <TargetFramework>net35</TargetFramework>
+        <AssemblyName>io.github.stupidrepo.WYDClassicMod</AssemblyName>
+        <Product>WYDClassicMod</Product>
+        <Version>1.0.0</Version>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+        <RootNamespace>WYDClassicMod</RootNamespace>
+        <NoWarn>CS0436</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Reference Include="$(MLManaged)\*.dll"/>
+        <Reference Include="$(GManaged)\Assembly-*.dll"/>
+        <Reference Include="$(GManaged)\Unity*.dll"/>
+    </ItemGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="HarmonyX" Version="2.13.0" />
+        <PackageReference Include="LavaGang.MelonLoader" Version="0.6.6" />
+        <PackageReference Include="MonoMod.Backports" Version="1.1.2" />
+    </ItemGroup>
+
+    <Target Name="CopyDLL" AfterTargets="AfterBuild">
+        <Copy SourceFiles="$(OutDir)\$(AssemblyName).dll" DestinationFolder="$(OurOutDir)" />
+    </Target>
+
+</Project>

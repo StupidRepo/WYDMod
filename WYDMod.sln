@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WYDMod", "WYDMod\WYDMod.csproj", "{6CA47072-0A5C-427A-90C5-A4CFC016D115}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WYDClassicMod", "WYDClassicMod\WYDClassicMod.csproj", "{3D7EE1DF-1AEC-4DC5-91F5-067BE2E93205}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6CA47072-0A5C-427A-90C5-A4CFC016D115}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CA47072-0A5C-427A-90C5-A4CFC016D115}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CA47072-0A5C-427A-90C5-A4CFC016D115}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CA47072-0A5C-427A-90C5-A4CFC016D115}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D7EE1DF-1AEC-4DC5-91F5-067BE2E93205}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D7EE1DF-1AEC-4DC5-91F5-067BE2E93205}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D7EE1DF-1AEC-4DC5-91F5-067BE2E93205}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D7EE1DF-1AEC-4DC5-91F5-067BE2E93205}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
