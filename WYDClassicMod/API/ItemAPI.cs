@@ -35,37 +35,59 @@ public static class ItemAPI
     [HarmonyPrefix]
     private static void StartPatch(ref ItemSpawner __instance)
     {
-        MelonLogger.Warning("Custom items are being registered now!! Any items registered after this will be IGNORED.");
+        MelonLogger.Warning("Custom items are being registered now.");
         
         var spawner = __instance;
+        
+        var lowTier = spawner.lowTierObj.ToList();
+        var midTier = spawner.midTierObj.ToList();
+        var special = spawner.specialObj.ToList();
+        var upstairs = spawner.upstairsObj.ToList();
+        
+        var midChance = spawner.chanceOfSpawnMid.ToList();
+        var specialChance = spawner.specialSpawnChance.ToList();
+        
         ItemsList.ForEach(item =>
         {
             switch (item.rarity)
             {
                 case Rarity.Low:
-                    MelonLogger.Msg($"Item {item.name} has been registered as a Low rarity.");
-                    spawner.lowTierObj.AddToArray(item.prefab);
+                    lowTier.Add(item.prefab);
                     break;
                 
                 case Rarity.Mid:
-                    MelonLogger.Msg($"Item {item.name} has been registered as a Mid rarity.");
-                    
-                    spawner.midTierObj.AddToArray(item.prefab);
-                    spawner.chanceOfSpawnMid.AddToArray(item.spawnChance);
+                    midTier.Add(item.prefab);
+                    midChance.Add(item.spawnChance);
                     break;
                 
                 case Rarity.Special:
-                    MelonLogger.Msg($"Item {item.name} has been registered as a Special rarity.");
-                    spawner.specialObj.AddToArray(item.prefab);
-                    spawner.specialSpawnChance.AddToArray(item.spawnChance);
+                    special.Add(item.prefab);
+                    specialChance.Add(item.spawnChance);
+                    break;
+                
+                case Rarity.UpstairsOnly:
+                    upstairs.Add(item.prefab);
                     break;
                 
                 default:
-                    MelonLogger.Warning($"Item {item.name} has an invalid rarity. Defaulting to Low.");
-                    spawner.lowTierObj.AddToArray(item.prefab);
+                    MelonLogger.Error($"Unknown rarity: {item.rarity}");
                     break;
             }
         });
+        
+        spawner.lowTierObj = lowTier.ToArray();
+        spawner.midTierObj = midTier.ToArray();
+        spawner.specialObj = special.ToArray();
+        spawner.upstairsObj = upstairs.ToArray();
+        
+        spawner.chanceOfSpawnMid = midChance.ToArray();
+        spawner.specialSpawnChance = specialChance.ToArray();
+        
+        MelonLogger.Warning("Custom items have been registered! Final list:");
+        MelonLogger.Warning($"Low: {spawner.lowTierObj.Select(e => e.name).Join(delimiter: ",")}");
+        MelonLogger.Warning($"Mid: {spawner.midTierObj.Select(e => e.name).Join(delimiter: ",")}");
+        MelonLogger.Warning($"Special: {spawner.specialObj.Select(e => e.name).Join(delimiter: ",")}");
+        MelonLogger.Warning($"UpstairsOnly: {spawner.upstairsObj.Select(e => e.name).Join(delimiter: ",")}");
     }
 }
 
@@ -81,5 +103,6 @@ public enum Rarity
 {
     Low,
     Mid,
-    Special
+    Special,
+    UpstairsOnly
 }
