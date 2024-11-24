@@ -11,7 +11,7 @@ public class StatsPatches
 	{
 		if (__instance.GetComponent<PhotonView>().isMine)
 		{
-			WYDClassicMod.babyStats = __instance;
+			WYDClassicMod.BabyStats = __instance;
 		}
 	}
 }
@@ -25,7 +25,7 @@ public class DadPowerUpsPatches
 	{
 		if (__instance.GetComponent<PhotonView>().isMine)
 		{
-			WYDClassicMod.dadPowerUps = __instance;
+			WYDClassicMod.DadPowerUps = __instance;
 		}
 	}
 }

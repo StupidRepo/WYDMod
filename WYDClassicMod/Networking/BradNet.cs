@@ -1,14 +1,18 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ExitGames.Client.Photon;
 using MelonLoader;
 using Photon;
 using UnityEngine;
+using WYDClassicMod.Managers;
 
 namespace WYDClassicMod.Networking;
 
 public class BradNet: PunBehaviour
 {
+    public const byte SpawnEvent = 72;
+    
     public void Start()
     {
         MelonLogger.Msg("BradNet has started!");
@@ -29,22 +33,20 @@ public class BradNet: PunBehaviour
         UpdatePropertiesIfMaster();
     }
 
-    public override void OnPhotonCustomRoomPropertiesChanged(Hashtable propertiesThatChanged)
-    {
-        if (!propertiesThatChanged.ContainsKey("isModded") || PhotonNetwork.room == null || PhotonNetwork.isMasterClient)
-            return;
-        
-        var isModded = (bool) propertiesThatChanged["isModded"];
-        var modList = (string[]) propertiesThatChanged["modList"];
-        MelonLogger.Msg($"Room properties changed! We are modded = {isModded}! Mod list: {string.Join(", ", modList)}");
-    }
-    
+    // public override void OnPhotonCustomRoomPropertiesChanged(Hashtable propertiesThatChanged)
+    // {
+    //     if (!propertiesThatChanged.ContainsKey("isModded") || PhotonNetwork.room == null || PhotonNetwork.isMasterClient)
+    //         return;
+    //     
+    //     var isModded = (bool) propertiesThatChanged["isModded"];
+    //     var modList = (string[]) propertiesThatChanged["modList"];
+    // }
+
     public void UpdatePropertiesIfMaster()
     {
         if (!PhotonNetwork.isMasterClient)
             return;
         
-        MelonLogger.Msg("Setting properties to say we are modded!");
         PhotonNetwork.room.SetCustomProperties(new Hashtable {{"isModded", true}, {"modList", MelonHandler.Mods.Select(e => e.Info.Name).ToArray()}});
     }
 

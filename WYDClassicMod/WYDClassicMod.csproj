@@ -12,7 +12,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Reference Include="$(MLManaged)\*.dll"/>
+<!--        <Reference Include="$(MLManaged)\*.dll"/>-->
         <Reference Include="$(MelonLoader)"/>
         <Reference Include="$(GManaged)\Assembly-*.dll"/>
         <Reference Include="$(GManaged)\Photon*.dll"/>

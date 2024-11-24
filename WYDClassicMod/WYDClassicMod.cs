@@ -1,19 +1,24 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using System.Linq;
+using System.Reflection;
+using JetBrains.Annotations;
 using MelonLoader;
+using Photon;
 using UnityEngine;
-using WYDClassicMod.API;
+using WYDClassicMod.Managers;
 using WYDClassicMod.Networking;
+using Object = UnityEngine.Object;
 
 [assembly: MelonInfo(typeof(WYDClassicMod.WYDClassicMod), "WYDClassicMod", "1.0.0", "StupidRepo")]
 namespace WYDClassicMod;
 
 public class WYDClassicMod : MelonMod
 {
-	[CanBeNull] public static BabyStats babyStats;
-	public static DadPowerUps dadPowerUps;
+	[CanBeNull] public static BabyStats BabyStats;
+	public static DadPowerUps DadPowerUps;
 	
-	public static GameObject BradNetworking;
 	public static BradNet BradNet;
+	public static BradRPC BradRPC;
 
 	private const float windowWidth = 280f;
 	private Rect windowRect = new(20, 20, windowWidth, 75);
@@ -25,10 +30,9 @@ public class WYDClassicMod : MelonMod
 	public override void OnApplicationStart()
 	{
 		MelonLogger.Msg("Loading WYDClassicMod!");
-		
 		ConfigManager.Instance = new ConfigManager();
 		
-		ItemAPI.RegisterNewItem("Test Item", new GameObject("Toaster"), Rarity.Low, 100);
+		ItemManager.RegisterNewItem("Test Item", new GameObject("HELLO I AM CUSTOM"), Rarity.Low, 100);
 	}
 
 	public override void OnSceneWasLoaded(int buildIndex, string sceneName)
@@ -36,10 +40,16 @@ public class WYDClassicMod : MelonMod
 		if (hasLoadedNetworking) return;
 		hasLoadedNetworking = true;
 		
-		BradNetworking = new GameObject("BradNetworking");
-		BradNet = BradNetworking.AddComponent<BradNet>();
+		var net = new GameObject("BradNetworking");
+		var rpc = new GameObject("BradRPC");
 		
-		Object.DontDestroyOnLoad(BradNetworking);
+		Object.DontDestroyOnLoad(rpc);
+		rpc.hideFlags |= HideFlags.HideAndDontSave;
+		
+		BradNet = net.AddComponent<BradNet>();
+		BradRPC = rpc.AddComponent<BradRPC>();
+		
+		Object.DontDestroyOnLoad(net);
 	}
 
 	public override void OnGUI()
@@ -47,22 +57,22 @@ public class WYDClassicMod : MelonMod
 		windowRect = GUILayout.Window(0, windowRect, DoMyWindow, "WYDClassicMod");
 	}
 
-	void DoMyWindow(int windowID)
+	private void DoMyWindow(int windowID)
 	{
-		if (babyStats != null)
+		if (BabyStats != null)
 		{
-			var clampedSickness = Mathf.Clamp(babyStats.sickness, 0f, 100f);
-			var clampedDrowness = Mathf.Clamp(babyStats.drownness, 0f, 100f);
-			var oneHundrededEnergy = babyStats.controlScript.energy * 100f;
+			var clampedSickness = Mathf.Clamp(BabyStats.sickness, 0f, 100f);
+			var clampedDrowness = Mathf.Clamp(BabyStats.drownness, 0f, 100f);
+			var oneHundrededEnergy = BabyStats.controlScript.energy * 100f;
 			
 			GUILayout.Label("<b>Baby Stats</b>");
 			GUILayout.Label($"<color=#eb4242>HP: {100f - clampedSickness:F1}%</color>");
-			GUILayout.Label($"<color=#4aeb42>Sickness: {clampedSickness:F1}%</color> <i>(Sickness Factor: {babyStats.sicknessFactor:F1})</i>");
+			GUILayout.Label($"<color=#4aeb42>Sickness: {clampedSickness:F1}%</color> <i>(Sickness Factor: {BabyStats.sicknessFactor:F1})</i>");
 			GUILayout.Label($"<color=#134ded>Oxygen: {100f - clampedDrowness:F1}%</color>");
 			
-			if (clampedSickness > 0f && babyStats.sicknessFactor > 1f)
+			if (clampedSickness > 0f && BabyStats.sicknessFactor > 1f)
 			{
-				var estimatedTimeToLive = (100f - clampedSickness) / babyStats.sicknessFactor;
+				var estimatedTimeToLive = (100f - clampedSickness) / BabyStats.sicknessFactor;
 				GUILayout.Label($"<b><color=#eb4242>You will die to sickness in {estimatedTimeToLive:F1}sec</color></b>");
 			}
 			
@@ -92,6 +102,8 @@ public class WYDClassicMod : MelonMod
 
 		if (PhotonNetwork.inRoom)
 		{
+			GUILayout.Space(16f);
+			
 			GUILayout.Label("<b>Lobby</b>");
 			GUILayout.Label($"Name: {PhotonNetwork.room.Name}");
 			GUILayout.Label($"Players: {PhotonNetwork.playerList.Length}/{PhotonNetwork.room.MaxPlayers}");
@@ -99,11 +111,21 @@ public class WYDClassicMod : MelonMod
 			
 			if (BradNet.IsModded())
 			{
-				GUILayout.Label("<b><color=green>Modded</color></b>");
+				GUILayout.Space(8f);
+				
+				GUILayout.Label("<b><color=green>Host is Modded</color></b>");
 				GUILayout.Label($"Mods: {string.Join(", ", BradNet.GetCurrentModList())}");
 			}
 			else
-				GUILayout.Label("<color=red>Not modded</color>");
+				GUILayout.Label("<color=red>Host is not Modded</color>");
+			
+			GUILayout.Space(8f);
+				
+			GUILayout.Label("<b>Players connected with mods</b>");
+			foreach (var player in PhotonNetwork.playerList.Where(e => e.CustomProperties.ContainsKey("isModded")))
+			{
+				GUILayout.Label($"{player.NickName}");
+			}
 		}
 
 		GUI.DragWindow();
