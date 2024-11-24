@@ -6,21 +6,21 @@
         <Product>WYDClassicMod</Product>
         <Version>1.0.0</Version>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <LangVersion>latest</LangVersion>
+        <LangVersion>12</LangVersion>
         <RootNamespace>WYDClassicMod</RootNamespace>
         <NoWarn>CS0436</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
-<!--        <Reference Include="$(MLManaged)\*.dll"/>-->
+        <Reference Include="$(MLManaged)\*.dll"/>
+        <Reference Include="$(MelonLoader)"/>
         <Reference Include="$(GManaged)\Assembly-*.dll"/>
         <Reference Include="$(GManaged)\Photon*.dll"/>
         <Reference Include="$(GManaged)\Unity*.dll"/>
     </ItemGroup>
     
     <ItemGroup>
-        <PackageReference Include="HarmonyX" Version="2.13.0" />
-        <PackageReference Include="LavaGang.MelonLoader" Version="0.6.6" />
+<!--        <PackageReference Include="LavaGang.MelonLoader" Version="0.6.6" />-->
         <PackageReference Include="MonoMod.Backports" Version="1.1.2" />
     </ItemGroup>
     

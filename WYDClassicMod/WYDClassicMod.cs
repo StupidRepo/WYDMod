@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using MelonLoader;
 using UnityEngine;
 using WYDClassicMod.API;
@@ -13,52 +12,41 @@ public class WYDClassicMod : MelonMod
 	[CanBeNull] public static BabyStats babyStats;
 	public static DadPowerUps dadPowerUps;
 	
-	public static GameObject BRPC;
-	public static GameObject BListener;
+	public static GameObject BradNetworking;
+	public static BradNet BradNet;
 
 	private const float windowWidth = 280f;
 	private Rect windowRect = new(20, 20, windowWidth, 75);
 	
 	private const float barHeight = 10f;
-	
-	private bool gameObjectsInitialized;
 
-	// public override void OnInitializeMelon()
-	// {
-	// 	MelonLogger.Msg("Loading WYDClassicMod!");
-	// 	ConfigManager.Instance = new ConfigManager();
-	// 	
-	// 	ItemAPI.RegisterNewItem("Test Item", new GameObject("Toaster"), Rarity.Low, 100);
-	// }
+	private bool hasLoadedNetworking;
 
-	// TODO: We do initialisation in here because OnInitializeMelon doesn't exist in 0.4.x? Need to find a way around this.
-	public override void OnSceneWasLoaded(int buildIndex, string sceneName)
+	public override void OnApplicationStart()
 	{
-		if (gameObjectsInitialized) return;
-		gameObjectsInitialized = true;
-		
 		MelonLogger.Msg("Loading WYDClassicMod!");
-			
-		BRPC = new GameObject("BradRPC");
-		BRPC.AddComponent<BradRPC>();
-		Object.DontDestroyOnLoad(BRPC);
-		
-		BListener = new GameObject("BradListener");
-		BListener.AddComponent<BradListener>();
-		Object.DontDestroyOnLoad(BListener);
-
-		// MelonLogger.Msg(MelonMod.RegisteredMelons.Select(e => e.Info.Name));
 		
 		ConfigManager.Instance = new ConfigManager();
 		
 		ItemAPI.RegisterNewItem("Test Item", new GameObject("Toaster"), Rarity.Low, 100);
 	}
 
+	public override void OnSceneWasLoaded(int buildIndex, string sceneName)
+	{
+		if (hasLoadedNetworking) return;
+		hasLoadedNetworking = true;
+		
+		BradNetworking = new GameObject("BradNetworking");
+		BradNet = BradNetworking.AddComponent<BradNet>();
+		
+		Object.DontDestroyOnLoad(BradNetworking);
+	}
+
 	public override void OnGUI()
 	{
 		windowRect = GUILayout.Window(0, windowRect, DoMyWindow, "WYDClassicMod");
 	}
-	
+
 	void DoMyWindow(int windowID)
 	{
 		if (babyStats != null)
@@ -102,8 +90,21 @@ public class WYDClassicMod : MelonMod
 		else
 			GUILayout.Label("<b><color=red>Your health and other stats will show up here when you're in-game!</color></b>");
 
-		if (PhotonNetwork.inRoom && PhotonNetwork.room.CustomProperties.ContainsKey("isModded"))
-			GUILayout.Label("<b>Lobby is modded!</b>");
+		if (PhotonNetwork.inRoom)
+		{
+			GUILayout.Label("<b>Lobby</b>");
+			GUILayout.Label($"Name: {PhotonNetwork.room.Name}");
+			GUILayout.Label($"Players: {PhotonNetwork.playerList.Length}/{PhotonNetwork.room.MaxPlayers}");
+			GUILayout.Label($"Ping: {PhotonNetwork.GetPing()}");
+			
+			if (BradNet.IsModded())
+			{
+				GUILayout.Label("<b><color=green>Modded</color></b>");
+				GUILayout.Label($"Mods: {string.Join(", ", BradNet.GetCurrentModList())}");
+			}
+			else
+				GUILayout.Label("<color=red>Not modded</color>");
+		}
 
 		GUI.DragWindow();
 	}

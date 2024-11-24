@@ -1,6 +1,4 @@
 using HarmonyLib;
-using MelonLoader;
-using UnityEngine;
 
 namespace WYDClassicMod.Patches;
 
