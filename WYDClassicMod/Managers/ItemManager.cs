@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
@@ -5,6 +6,7 @@ using JetBrains.Annotations;
 using MelonLoader;
 using UnityEngine;
 using WYDClassicMod.Networking;
+using Random = UnityEngine.Random;
 
 namespace WYDClassicMod.Managers;
 
@@ -17,7 +19,10 @@ public static class ItemManager
         string name,
         GameObject prefab,
         Rarity rarity,
-        int spawnChance
+        int spawnChance,
+        int layer,
+        string tag,
+        params Type[] components
     )
     {
         var item = new Item
@@ -25,7 +30,10 @@ public static class ItemManager
             name = name,
             prefab = prefab,
             rarity = rarity,
-            spawnChance = spawnChance
+            spawnChance = spawnChance,
+            layer = layer,
+            tag = tag,
+            components = components
         };
         
         ItemRegistry.Add(item);
@@ -81,6 +89,9 @@ public class Item
     public GameObject prefab;
     public Rarity rarity;
     [Range(0, 100)] public int spawnChance;
+    public int layer;
+    public string tag;
+    public Type[] components;
 }
 
 public enum Rarity
@@ -89,4 +100,146 @@ public enum Rarity
     Mid,
     Special,
     UpstairsOnly
+}
+
+public abstract class InteractableItem : MonoBehaviour
+{
+    public PhotonView netView;
+    
+    public void Start() =>
+        netView = GetComponent<PhotonView>();
+    
+    public void Interact(Transform input)
+    {
+        if (!PhotonNetwork.connected)
+            return;
+        netView.RPC("RPCInteract", PhotonTargets.All, input.gameObject.name);
+    }
+
+    [PunRPC]
+    public void RPCInteract(string interactedBy)
+    {
+        MelonLogger.Msg($"Interacted by {interactedBy}!");
+    }
+}
+
+public abstract class PickupableItem : MonoBehaviour
+{
+    public PhotonView netView;
+    public Rigidbody rb;
+    public PhotonNetworkManager netManager;
+    public GameObject actionText;
+    public int startLayer;
+    
+    public Transform curHoldPos;
+    
+    public bool held;
+    
+    public void Start()
+    {
+        netView = GetComponent<PhotonView>();
+        rb = GetComponent<Rigidbody>();
+        netManager = GameObject.Find("NetworkManager").GetComponent<PhotonNetworkManager>();
+        actionText = GameObject.Find("ActionText");
+        startLayer = gameObject.layer;
+    }
+    
+    public void Update()
+    {
+        if (!held) return;
+        
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.identity;
+    }
+
+    public virtual void ButtonDown()
+    {
+        MelonLogger.Msg("Shoot/fire!");
+    }
+
+    public void Interact(Transform input)
+    {
+        if (!PhotonNetwork.connected)
+            return;
+        netView.RPC("RPCInteract", PhotonTargets.All, input.gameObject.name);
+    }
+
+    [PunRPC]
+    public void RPCInteract(string interactedBy)
+    {
+        MelonLogger.Msg($"Interacted by {interactedBy}!");
+        HandlePickup(interactedBy);
+    }
+
+    private void HandlePickup(string interactedBy)
+    {
+        var player = GameObject.Find(interactedBy);
+        if (player == null)
+            return;
+        
+        if (!held)
+        {
+            curHoldPos = player.transform.FindDeepChild(player.gameObject.name.Substring(0, 3) == "Bab" ? "BabyHoldPos" : "DadHoldPos");
+            player.gameObject.SendMessage("SetItem", gameObject.name);
+        } else if (player.gameObject.name.Substring(0, 3) == "Dad" && netManager.curGameMode != 4)
+        {
+            transform.root.SendMessage("DropItem");
+            
+            if (transform.root.GetComponent<PhotonView>().isMine)
+                actionText.SendMessage("ActionDone", "Your Daddy took the " + gameObject.name.Substring(0, gameObject.name.Length - 5));
+            
+            curHoldPos = transform.FindDeepChild("DaddyHold");
+        }
+    }
+    
+    public void Grab()
+    {
+        if (!PhotonNetwork.connected)
+            return;
+        
+        MelonLogger.Msg("Grabbed!");
+        netView.RPC("RPCGrab", PhotonTargets.All);
+    }
+    
+    [PunRPC]
+    public void RPCGrab()
+    {
+        GetComponent<NetworkMovementRB>().enabled = false;
+        
+        held = true;
+        
+        rb.isKinematic = true;
+        rb.constraints = RigidbodyConstraints.FreezeAll;
+        
+        transform.SetParent(curHoldPos);
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.identity;
+    }
+    
+    public void Drop(Vector3 input)
+    {
+        if (!PhotonNetwork.connected) return;
+        
+        MelonLogger.Msg("Dropped!");
+        netView.RPC("RPCDrop", PhotonTargets.All, input);
+    }
+
+
+    [PunRPC]
+    public void RPCDrop(Vector3 dropPos)
+    {
+        held = false;
+
+        gameObject.layer = startLayer;
+        
+        rb.isKinematic = false;
+        rb.constraints = RigidbodyConstraints.None;
+
+        transform.parent = null;
+        
+        if (dropPos != Vector3.zero)
+            transform.position = dropPos;
+
+        GetComponent<NetworkMovementRB>().enabled = true;
+    }
 }

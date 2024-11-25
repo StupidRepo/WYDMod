@@ -31,6 +31,10 @@
     <ItemGroup>
       <Folder Include="Zip\" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <EmbeddedResource Include="ABs\gun" />
+    </ItemGroup>
 
     <Target Name="CopyDLL" AfterTargets="AfterBuild">
         <ItemGroup>

@@ -49,6 +49,17 @@ public class BradRPC: MonoBehaviour
         
         var go = Instantiate(item.prefab, position, Quaternion.identity);
         go.name = item.name;
+        go.layer = item.layer;
+        go.tag = item.tag;
+        
+        var pv = go.AddComponent<PhotonView>();
+        pv.viewID = PhotonNetwork.AllocateViewID();
+        
+        go.AddComponent<Rigidbody>();
+        go.AddComponent<NetworkMovementRB>();
+        go.AddComponent<PickUp>();
+
+        item.components.ToList().ForEach(e => go.AddComponent(e));
     }
     
     [PunRPC]

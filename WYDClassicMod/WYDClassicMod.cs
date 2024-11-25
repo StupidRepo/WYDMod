@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 using MelonLoader;
 using Photon;
 using UnityEngine;
+using WYDClassicMod.Items;
 using WYDClassicMod.Managers;
 using WYDClassicMod.Networking;
 using Object = UnityEngine.Object;
@@ -31,13 +32,11 @@ public class WYDClassicMod : MelonMod
 	{
 		MelonLogger.Msg("Loading WYDClassicMod!");
 		ConfigManager.Instance = new ConfigManager();
-		
-		ItemManager.RegisterNewItem("Test Item", new GameObject("HELLO I AM CUSTOM"), Rarity.Low, 100);
 	}
 
 	public override void OnSceneWasLoaded(int buildIndex, string sceneName)
 	{
-		if (hasLoadedNetworking) return;
+		if (hasLoadedNetworking || sceneName != "Game") return;
 		hasLoadedNetworking = true;
 		
 		var net = new GameObject("BradNetworking");
@@ -50,6 +49,19 @@ public class WYDClassicMod : MelonMod
 		BradRPC = rpc.AddComponent<BradRPC>();
 		
 		Object.DontDestroyOnLoad(net);
+		
+		// var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+		// cube.name = "WYDClassicModCube";
+		// cube.transform.localScale = new Vector3(2f, 2f, 2f);
+		// cube.layer = LayerMask.NameToLayer("Grabable");
+		// cube.tag = "Grab";
+		
+		// Object.DontDestroyOnLoad(cube);
+		
+		AssetBundleManager.LoadABFromEmbeddedResources("gun", Assembly.GetExecutingAssembly());
+
+		ItemManager.RegisterNewItem("Gun", AssetBundleManager.GetGameObject("BGPrefab"), Rarity.Mid, 100, 
+			LayerMask.NameToLayer("Grabable"), "Grab", typeof(Gun));
 	}
 
 	public override void OnGUI()
