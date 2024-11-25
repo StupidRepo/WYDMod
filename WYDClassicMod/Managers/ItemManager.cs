@@ -134,8 +134,11 @@ public abstract class PickupableItem : MonoBehaviour
     public Transform curHoldPos;
     
     public bool held;
+    public bool lastPickupWasDad;
     
-    public void Start()
+    public bool leftHandPickup;
+    
+    public virtual void Start()
     {
         netView = GetComponent<PhotonView>();
         rb = GetComponent<Rigidbody>();
@@ -179,16 +182,20 @@ public abstract class PickupableItem : MonoBehaviour
         
         if (!held)
         {
-            curHoldPos = player.transform.FindDeepChild(player.gameObject.name.Substring(0, 3) == "Bab" ? "BabyHoldPos" : "DadHoldPos");
-            player.gameObject.SendMessage("SetItem", gameObject.name);
+            lastPickupWasDad = player.gameObject.name.Substring(0, 3) == "Dad";
+            curHoldPos = player.transform.FindDeepChild(player.gameObject.name.Substring(0, 3) == "Bab"
+                ? (leftHandPickup ? "LeftBabyHoldPos" : "BabyHoldPos")
+                : (leftHandPickup ? "LeftDadHoldPos" : "DadHoldPos"));
+            
+            player.gameObject.SendMessage(leftHandPickup ? "SetLeftItem" : "SetItem", gameObject.name);
         } else if (player.gameObject.name.Substring(0, 3) == "Dad" && netManager.curGameMode != 4)
         {
-            transform.root.SendMessage("DropItem");
+            transform.root.SendMessage(leftHandPickup ? "DropLeftItem" : "DropItem");
             
             if (transform.root.GetComponent<PhotonView>().isMine)
                 actionText.SendMessage("ActionDone", "Your Daddy took the " + gameObject.name.Substring(0, gameObject.name.Length - 5));
             
-            curHoldPos = transform.FindDeepChild("DaddyHold");
+            curHoldPos = transform.FindDeepChild(leftHandPickup ? "LeftDadHoldPos" : "DadHoldPos");
         }
     }
     
@@ -236,9 +243,10 @@ public abstract class PickupableItem : MonoBehaviour
         rb.constraints = RigidbodyConstraints.None;
 
         transform.parent = null;
-        
-        if (dropPos != Vector3.zero)
-            transform.position = dropPos;
+
+        // ignore this for now because items have a chance to go in ground
+        // if (dropPos != Vector3.zero)
+        //     transform.position = dropPos;
 
         GetComponent<NetworkMovementRB>().enabled = true;
     }
