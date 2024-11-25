@@ -78,7 +78,7 @@ public static class ItemManager
                     continue;
             }
 
-            BradRPC.RPC(nameof(BradRPC.SpawnCustomItemRPC), PhotonTargets.All, item.name, position);
+            WYDClassicMod.BradNet.photonView.RPC(nameof(BradNet.SpawnCustomItemRPC), PhotonTargets.All, item.name, position);
         }
     }
 }

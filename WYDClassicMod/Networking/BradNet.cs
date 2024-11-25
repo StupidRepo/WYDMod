@@ -1,28 +1,38 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using ExitGames.Client.Photon;
 using MelonLoader;
 using Photon;
 using UnityEngine;
 using WYDClassicMod.Managers;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 namespace WYDClassicMod.Networking;
 
 public class BradNet: PunBehaviour
 {
-    public const byte SpawnEvent = 72;
-    
     public void Start()
     {
-        MelonLogger.Msg("BradNet has started!");
+        StartCoroutine(WaitUntilPlayerIsNotNull());
     }
 
+    private IEnumerator WaitUntilPlayerIsNotNull()
+    {
+        while (PhotonNetwork.player == null)
+            yield return null;
+        
+        MelonLogger.Msg($"BradNet has started! {PhotonNetwork.player}");
+        
+        var pv = gameObject.AddComponent<PhotonView>();
+        pv.viewID = 202411;
+    }
+    
     public override void OnConnectedToPhoton()
     {
         MelonLogger.Msg("Photon connection established!");
     }
-    
+
     public override void OnCreatedRoom()
     {
         UpdatePropertiesIfMaster();
@@ -61,5 +71,34 @@ public class BradNet: PunBehaviour
     public bool IsModded()
     {
         return PhotonNetwork.room != null && PhotonNetwork.room.CustomProperties.ContainsKey("isModded");
+    }
+    
+    [PunRPC]
+    public void SpawnCustomItemRPC(string itemName, Vector3 position)
+    {
+        var item = ItemManager.GetItemByName(itemName);
+        if(item == null)
+        {
+            if (PhotonNetwork.isMasterClient) return;
+            
+            MelonLogger.Error($"Item \"{itemName}\" was not found in the item registry.");
+            return;
+        }
+        
+        MelonLogger.Msg($"Spawning {itemName} at {position}!");
+        
+        var go = Instantiate(item.prefab, position, Quaternion.identity);
+        go.name = item.name;
+        go.layer = item.layer;
+        go.tag = item.tag;
+        
+        var pv = go.AddComponent<PhotonView>();
+        pv.viewID = PhotonNetwork.AllocateViewID();
+        
+        go.AddComponent<Rigidbody>();
+        go.AddComponent<NetworkMovementRB>();
+        go.AddComponent<PickUp>();
+
+        item.components.ToList().ForEach(e => go.AddComponent(e));
     }
 }

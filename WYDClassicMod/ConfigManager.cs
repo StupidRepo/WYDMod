@@ -5,7 +5,8 @@ namespace WYDClassicMod;
 public class ConfigManager
 {
 	public MelonPreferences_Category GeneralCategory;
-
+	public MelonPreferences_Entry<bool> EnableGUI;
+	
 	public static ConfigManager Instance { get; set; }
 
 	public ConfigManager()
@@ -14,6 +15,7 @@ public class ConfigManager
 
 		#region General
 			GeneralCategory = MelonPreferences.CreateCategory("WYDClassicMod.General", "General Settings");
+			
 		#endregion
 	}
 }

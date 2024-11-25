@@ -46,7 +46,7 @@ public class Gun: PickupableItem
 
 	public void OnGUI()
 	{
-		if(held && lastPickupWasDad && netView.isMine)
+		if(held && netView.isMine)
 			GUI.Label(new Rect(20, Screen.height - 40, 200, 40), $"<b><size=32>{ammo}/{maxAmmo}</size></b>");
 	}
 }

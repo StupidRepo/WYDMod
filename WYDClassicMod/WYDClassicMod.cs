@@ -19,7 +19,6 @@ public class WYDClassicMod : MelonMod
 	public static DadPowerUps DadPowerUps;
 	
 	public static BradNet BradNet;
-	public static BradRPC BradRPC;
 
 	private const float windowWidth = 280f;
 	private Rect windowRect = new(20, 20, windowWidth, 75);
@@ -46,8 +45,6 @@ public class WYDClassicMod : MelonMod
 		rpc.hideFlags |= HideFlags.HideAndDontSave;
 		
 		BradNet = net.AddComponent<BradNet>();
-		BradRPC = rpc.AddComponent<BradRPC>();
-		
 		Object.DontDestroyOnLoad(net);
 		
 		// var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
